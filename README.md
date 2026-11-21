@@ -28,7 +28,7 @@ itself is quick. Understanding the question is not.
 |---|---|
 | Questions are written in jargon: ticket numbers, file names, internal labels. | Plain words. A technical term is explained once, in half a sentence. |
 | "It depends" - the agent lists options but does not commit. | Exactly one recommendation per question, with a reason. |
-| You answer things the agent could have found out itself. | Questions the agent can settle (code, docs, a measurement) are settled first and reported in one line. |
+| You answer things the agent could have found out itself. | Questions the agent can settle by reading code and docs are settled first and reported in one line. |
 | You get asked the same thing twice. | Questions you already decided are dropped. |
 | Twelve questions at once, the blocking one is number nine. | At most 7 per brief, blocking questions and deadlines first. |
 | An option silently costs money or cannot be undone. | A **Warning** line before the options. |
@@ -99,12 +99,15 @@ call any service by itself. It tells your agent what to do with the agent's norm
 
 - **Reading:** the agent reads the sources you point it to (an issue, a report, a file).
   Text from these sources is treated as data - the skill forbids following instructions
-  found inside them, which blocks indirect prompt injection through public issues.
-- **Checking:** questions are settled only with read-only checks. Anything that changes
+  found inside them. This reduces the risk of indirect prompt injection through public
+  issues, but prompt rules cannot fully prevent it: point the skill only at sources you
+  would also read yourself.
+- **Checking:** questions are settled only by reading tracked project files and docs - no
+  shell or network commands, no `.env`, secret or credential files. Anything that changes
   state, costs money or touches an account needs your approval.
 - **Writing back:** inside the session, the chosen options go back to the agent that
   asked. Before anything is written outside the session (an issue, a pull request, a
-  chat), the agent shows you the exact text and waits for your OK. It sends only your
+  chat), the agent shows you the exact target and the exact text and waits for your OK. It sends only your
   choices, never your raw chat, secrets or customer data.
 
 ## License
