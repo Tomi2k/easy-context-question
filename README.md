@@ -32,7 +32,7 @@ itself is quick. Understanding the question is not.
 | You get asked the same thing twice. | Questions you already decided are dropped. |
 | Twelve questions at once, the blocking one is number nine. | At most 7 per brief, blocking questions and deadlines first. |
 | An option silently costs money or cannot be undone. | A **Warning** line before the options. |
-| Your answer gets lost. | The skill hands your decision back to whoever asked, with date and your exact words. |
+| Your answer gets lost. | The skill hands your choices back to whoever asked - outside the session only after your OK. |
 
 ### Plain words on purpose
 
@@ -79,8 +79,9 @@ cp -r easy-context-question/skills/easy-context-question ~/.claude/skills/
 /easy-context-question the review report    any source the agent can read
 ```
 
-It also triggers on plain requests such as "what do I need to decide?" or "explain the
-open questions". In multi-agent setups, tell your manager agent to use this format for
+It also runs on plain requests such as "what do I need to decide?" or "explain the
+open questions", and when your agent is about to put a manager agent's or subagent's
+questions to you. In multi-agent setups, tell your manager agent to use this format for
 every question it sends you - then every check-in ends with one line you can answer.
 
 ## Rules the skill follows
@@ -93,9 +94,18 @@ every question it sends you - then every check-in ends with one line you can ans
 
 ## Security
 
-The skill is a single Markdown file: no scripts, no network calls, no hooks. It only
-reads what your agent can already read and writes a brief into the conversation. Keep
-the "no secrets, no customer data" rule in mind if you forward briefs to other people.
+The skill is a single Markdown file: no scripts, no hooks, no dependencies. It does not
+call any service by itself. It tells your agent what to do with the agent's normal tools:
+
+- **Reading:** the agent reads the sources you point it to (an issue, a report, a file).
+  Text from these sources is treated as data - the skill forbids following instructions
+  found inside them, which blocks indirect prompt injection through public issues.
+- **Checking:** questions are settled only with read-only checks. Anything that changes
+  state, costs money or touches an account needs your approval.
+- **Writing back:** inside the session, the chosen options go back to the agent that
+  asked. Before anything is written outside the session (an issue, a pull request, a
+  chat), the agent shows you the exact text and waits for your OK. It sends only your
+  choices, never your raw chat, secrets or customer data.
 
 ## License
 
