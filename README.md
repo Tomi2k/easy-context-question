@@ -50,17 +50,17 @@ for a busy founder between two calls.
 ### Question 1: How long to keep debug logs (#57)
 
 **What this is about:** The app keeps debug logs for 90 days. They use 40 GB and cost
-9 USD per month. In the last 6 months nobody opened a log older than 14 days.
+9 USD per month. Nobody opens a log older than 14 days in the last 6 months.
 
 **Warning:** Option A deletes all logs older than 14 days. You cannot get them back.
 
 **Options:**
-- **A - Keep 14 days:** Storage drops to about 7 GB. Cost drops to about 2 USD per month. Effort for you: 0.
+- **A - Keep 14 days:** Storage drops to about 7 GB. Cost drops to about 2 USD per month. Effort for you: 0 min.
 - **B - Keep 90 days:** Nothing changes. Cost stays at 9 USD per month.
 
-**Recommendation: A.** The old logs are not used, and the saving repeats every month.
+**Recommendation: A.** Nobody uses the old logs. The saving repeats every month.
 
-Answer: "all recommendations", or one letter per question, for example "1A".
+Answer: One letter per warning question, for example "1A".
 ```
 
 ## Install
@@ -95,20 +95,30 @@ every question it sends you - then every check-in ends with one line you can ans
 ## Security
 
 The skill is a single Markdown file: no scripts, no hooks, no dependencies. It does not
-call any service by itself. It tells your agent what to do with the agent's normal tools:
+call any service by itself. All boundaries below are **prompt instructions** to your
+agent, not tool-level OS sandboxing — your CLI's own tool permission model remains the
+real security boundary:
 
-- **Reading:** the agent reads the sources you point it to (an issue, a report, a file).
-  Text from these sources is treated as data - the skill forbids following instructions
-  found inside them. This reduces the risk of indirect prompt injection through public
-  issues, but prompt rules cannot fully prevent it: point the skill only at sources you
-  would also read yourself.
-- **Checking:** questions are settled only by reading tracked project files and docs - no
-  shell or network commands, no `.env`, secret or credential files. Anything that changes
-  state, costs money or touches an account needs your approval.
-- **Writing back:** inside the session, the chosen options go back to the agent that
-  asked. Before anything is written outside the session (an issue, a pull request, a
-  chat), the agent shows you the exact target and the exact text and waits for your OK. It sends only your
-  choices, never your raw chat, secrets or customer data.
+- **Reading & Auto-Triggering:** The skill runs when you invoke it or when the agent
+  prepares manager/subagent questions in the current conversation. On auto-trigger, it
+  asks your confirmation before fetching external sources and skips third-party public
+  comments unless explicitly requested. Text from sources is treated as data, never as
+  instructions. Because prompt rules cannot fully stop indirect prompt injection in an
+  unsandboxed agent, point the skill only at **sources from authors you trust** (avoid
+  untrusted public issues and third-party comments).
+- **Checking:** The skill instructs the agent to settle questions only by reading project
+  files and docs inside the repository root (skipping local-file checks when the source
+  is an external issue), with no shell or network commands and no reads of `.env`,
+  `.env.*`, `*.env`, `*secret*`, `*credential*`, `*token*`, `*.pem`, `*.key`, `*.pfx`,
+  `.npmrc`, `.pypirc`, `.netrc`, `*.tfvars`, `*local*`, or `kubeconfig`. Anything that
+  changes state, costs money, or touches an account requires your approval.
+- **Writing back & Warned Decisions:** Inside the session, chosen options go back to the
+  agent that asked. Questions with a `**Warning:**` line (irreversible, paid, or
+  data-sharing) are excluded from `"all recommendations"` and require an explicit
+  per-question letter (e.g., `"1A"`). Before anything is written outside the session
+  (an issue, a pull request, a chat), the skill instructs the agent to show the exact
+  target and exact text and wait for your OK, sending only your choices — never raw
+  chat, secrets, or customer data.
 
 ## License
 
@@ -116,4 +126,4 @@ MIT - see [LICENSE](LICENSE).
 
 ---
 
-Built by **Timothy Scherman**. Less AI theater. More results.
+Built by **Timothy Scherman** ([timothyscherman.com](https://timothyscherman.com)). Less AI theater. More results.
